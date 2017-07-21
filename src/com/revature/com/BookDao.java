@@ -8,35 +8,35 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 
 
 
 
 public class BookDao {
+	private JdbcTemplate jdbcTemplate = ConnectionUtil.getJdbcTemplate();
 	public void register (Book book)throws Exception{
 		 LocalDate p=LocalDate.parse("2014-05-10");
 		 
-		Connection con=ConnectionUtil.getConnection();
-		String sql="insert into book(name,price,publisheddate )values(?,?,?)";
-		PreparedStatement pst= con.prepareStatement(sql);
-		pst.setString(1,book.getName());
-		pst.setInt(2,book.getPrice());
-		pst.setDate(3,Date.valueOf(p));
 		
-		int rows=pst.executeUpdate();
+		String sql="insert into book(name,price,publisheddate )values(?,?,?)";
+		Object[] params={book.getName(),book.getPrice(),book.getDate()};
+		
+		int rows=jdbcTemplate.update(sql,params);
 				
 			System.out.println(rows);
 		
 	}
-	//public static void main(String[] args) throws Exception {
+//public static void main(String[] args) throws Exception {
 	public List<Book> listBooks() throws Exception{
+			JdbcTemplate con=ConnectionUtil.getJdbcTemplate();
+		
+		String sql="select id,name,price,publisheddate from book";
+		List<Book>bookList =jdbcTemplate.query(sql,(rs,rowNo)->{
+		
 	
-		Connection con=ConnectionUtil.getConnection();
-		String sql="select id,name,price,publisheddate from Book";
-		PreparedStatement pst=con.prepareStatement(sql);
-		List<Book>bookList=new ArrayList<Book>();
-		ResultSet rs=pst.executeQuery();
-		while(rs.next()){
+	
 			int id=rs.getInt("id");
 			String name=rs.getString("name");
 			int price=rs.getInt("price");
@@ -46,9 +46,9 @@ public class BookDao {
 			b.setName(name);
 			b.setPrice(price);
 			b.setDate(publishedDate.toLocalDate());
-			bookList.add(b);
+			return b;
 			
-		}
+		});
 		System.out.println(bookList);
 		return bookList;
 		//for(Book b:bookList)

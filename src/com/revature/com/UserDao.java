@@ -5,49 +5,53 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 public class UserDao {
-	public  void register(UserClass user)throws Exception,Exception{
-	 
-	Connection con=ConnectionUtil.getConnection();
-	String sql="insert into UserClass(name,email,password )values(?,?,?)";
-	PreparedStatement pst= con.prepareStatement(sql);
-	pst.setString(1,user.getName());
-	pst.setString(2,user.getEmail());
-	pst.setString(3,user.getPassword());
-	int rows=pst.executeUpdate();
-			
+
+	private JdbcTemplate jdbcTemplate = ConnectionUtil.getJdbcTemplate();
+
+	public void register(UserClass user) throws Exception, Exception {
+
+		String sql = "insert into UserClass(name,email,password )values(?,?,?)";
+		Object[] params = { user.getName(), user.getEmail(), user.getPassword() };
+
+		int rows = jdbcTemplate.update(sql, params);
+
 		System.out.println(rows);
 	}
-	public UserClass  login(String email, String password) throws Exception {
-	//public static void main(String[] args) throws Exception {
+
+	public UserClass login(String email, String password) throws Exception {
+		// public static void main(String[] args) throws Exception {
+
+		String sql = "select id,name,email,password from UserClass where email = ? and password = ? ";
+
+		Object[] params = { email, password };
+
+		UserClass userClass = null;
+		try {
+			userClass = jdbcTemplate.queryForObject(sql, params, (rs, rowno) -> {
+
+				int id = rs.getInt("id");
+				String name = rs.getString("name");
+				String Email = rs.getString("email");
+				String Password = rs.getString("password");
+
+				UserClass user = new UserClass();
+				user.setId(id);
+				user.setName(name);
+				user.setEmail(Email);
+				user.setPassword(password);
+
+				return user;
+			});
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-	
-		 Connection con=ConnectionUtil.getConnection();
-		 String sql = "select id,name,email,password from UserClass where email = ? and password = ? ";
-		 PreparedStatement pst=con.prepareStatement(sql);
-		 pst.setString(1,"nivi05");
-		 pst.setString(2,"ni345");
-		 UserClass user = null;
-		 ResultSet rs=pst.executeQuery();
-		 if(rs.next()){
-			 int id=rs.getInt("id");
-			 String name=rs.getString("name");
-			 String Email=rs.getString("email");
-			 String Password=rs.getString("password");
-			 
-			 
-			 user=new UserClass();
-			 user.setId(id);
-			 user.setName(name);
-			 user.setEmail(Email);
-			 user.setPassword(password);
-			 
-			 
-		 }
-		 
-	        System.out.println(user);
-	        return user;
-	 
-	
-}
+		
+		return userClass;
+
+	}
 }

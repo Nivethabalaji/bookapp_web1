@@ -7,18 +7,6 @@
 <title>Insert title here</title>
 </head>
 <body>
-<h2> Order Books</h2>
-<form action="OrderServlet">
-User id:<input type="number" name="userid" autofocus required></br>
-Select book;
-<select name="bookid"required></br>
-<option value="1">c</option>
-<option value="2">c++</option>
-</select>
-</br>
-Quality:<input type="number" name="quality"required>
-<button type="submit">submit</button>
-</form>
 
 </body>
 </html>

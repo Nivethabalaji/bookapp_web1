@@ -9,20 +9,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 public class BookorderDAo {
+	JdbcTemplate jdbcTemplate = ConnectionUtil.getJdbcTemplate();
+
 	public void register (BookOrder order)throws Exception{
-		 LocalDate p=LocalDate.parse("2014-05-10");
-		 
-		Connection con=ConnectionUtil.getConnection();
 		String sql="insert into Bookorders(UserClass_id,book_id,status,quantity,Order_date)values(?,?,?,?,?)";
-		PreparedStatement pst= con.prepareStatement(sql);
-		pst.setInt(1,order.getUserClassId());
-		pst.setInt(2,order.getBookId());
-		pst.setString(3,order.getStatus());
-		pst.setInt(4,order.getQuantity());
-		pst.setDate(5,Date.valueOf(p));
+		Object[] params={order.getUserClassId(),order.getBookId(),order.getStatus(),order.getQuantity(),order.getOrderDate()};
 		
-		int rows=pst.executeUpdate();
+		int rows=jdbcTemplate.update(sql,params);
 		System.out.println(rows);
 	
 
@@ -31,12 +27,10 @@ public class BookorderDAo {
 		
 	
 	public List<BookOrder> login() throws Exception {
-		Connection con=ConnectionUtil.getConnection();
+	
 		String sql="select id,UserClass_id,book_id,status,quantity,Order_date from Bookorders ";
-		PreparedStatement pst=con.prepareStatement(sql);
-		List<BookOrder>orderList=new ArrayList<BookOrder>();
-		ResultSet rs=pst.executeQuery();
-		while(rs.next()){
+		
+		List<BookOrder>orderList =jdbcTemplate.query(sql,(rs,rowNo)->{
 			int Id=rs.getInt("id");
 			int userclassId=rs.getInt("userClass_id");
 			int bookId=rs.getInt("book_id");
@@ -50,14 +44,14 @@ public class BookorderDAo {
 			order.setQuantity(quantity);
 			order.setStatus(status);
 			order.setOrderDate(order_date.toLocalDateTime());
+			return order;
 			
 			
 			
 			
 			
 			
-			orderList.add(order);
-		}
+		});
 		System.out.println(orderList);
 		
 		return orderList;
